@@ -5,3 +5,4 @@ shell = sciluigi.shell
 AFile = sciluigi.AFile
 SciTask = sciluigi.SciTask
 ShellTask = sciluigi.ShellTask
+WorkflowTask = sciluigi.WorkflowTask

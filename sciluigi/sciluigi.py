@@ -38,15 +38,13 @@ class SciTask(luigi.Task):
     def outport(self, outport):
         return { 'upstream' : { 'task': self, 'port': outport } }
 
-    def run(self):
-        cmd = self._replace_inputs(self.cmd)
-        ms = self._find_outputs(cmd)
-        for m in ms:
-            cmd = cmd.replace(m[0], self.output()[m[1]].path)
-        print("****** NOW RUNNING COMMAND ******: " + cmd)
-        # Remove any trailing comments in the line
-        cmd = re.sub('(\ )?\#.*$', '', cmd)
-        print commands.getstatusoutput(cmd)
+    def requires(self):
+        upstream_tasks = []
+        if hasattr(self, 'inports'):
+            for portname, inport in self.inports.iteritems():
+                if type(inport) is dict:
+                    upstream_tasks.append(inport['upstream']['task'])
+        return upstream_tasks
 
 
 class ShellTask(SciTask):
@@ -69,19 +67,21 @@ class ShellTask(SciTask):
         return re.findall('(\<o:([^\>]+)(:([^\>]+))\>)', cmd)
 
     # --- Luigi methods ----
-    def requires(self):
-        upstream_tasks = []
-        if hasattr(self, 'inports'):
-            for portname, inport in self.inports.iteritems():
-                if type(inport) is dict:
-                    upstream_tasks.append(inport['upstream']['task'])
-        return upstream_tasks
-
     def output(self):
         cmd = self._replace_inputs(self.cmd)
         ms = self._find_outputs(cmd)
         outputs = {m[1]: luigi.LocalTarget(m[3]) for m in ms}
         return outputs
+
+    def run(self):
+        cmd = self._replace_inputs(self.cmd)
+        ms = self._find_outputs(cmd)
+        for m in ms:
+            cmd = cmd.replace(m[0], self.output()[m[1]].path)
+        print("*** NOW RUNNING COMMAND ***: " + cmd)
+        # Remove any trailing comments in the line
+        cmd = re.sub('(\ )?\#.*$', '', cmd)
+        print commands.getstatusoutput(cmd)
 
 
 class WorkflowTask(luigi.Task):

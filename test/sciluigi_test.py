@@ -15,8 +15,8 @@ def teardown():
 
 @with_setup(setup, teardown)
 def test_inports_nonempty():
-    assert len(shell_task.inports) == 1
+    assert len(shell_task.inports) == 0
 
 @with_setup(setup, teardown)
 def test_outports_nonempty():
-    assert len(shell_task.outports) == 1
+    assert len(shell_task.outport('output')) == 1

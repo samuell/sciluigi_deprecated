@@ -1,9 +1,6 @@
 import sciluigi
 from nose.tools import with_setup
 
-# Make these variables global
-#shell_task = None
-
 def setup():
     global shell_task
     shell_task = sciluigi.shell("cat <i:input> > <o:output:out.txt>")
